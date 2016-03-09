@@ -1,7 +1,8 @@
 import Glibc
 
 struct EightPuzzle {
-   static func manhattan(x1: UInt8, y1: UInt8, x2: UInt8, y2: UInt8) -> UInt8 {
+
+   static func manhattan(x1: Int, y1: Int, x2: Int, y2: Int) -> Int {
        return abs(x1 - x2) + abs(y1 - y2)
    }
 }
