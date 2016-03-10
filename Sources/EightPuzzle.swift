@@ -11,7 +11,7 @@ struct EightPuzzle {
         getPath()
     }
 
-    private populateTree() {
+    private func populateTree() {
     }
 
     private func moveBlank(boardLayout: String, row: Int, column: Int) -> String {
@@ -25,14 +25,14 @@ struct EightPuzzle {
     private func getDirectionOfMove(row: Int, column: Int) -> String {
         return ""
     }
-
-    private func inClosed(node: Node) -> Bool {
+/*
+    private func inClosed(node: Node<Element>) -> Bool {
     }
 
-    private func generatePossibleMoves(node: Node) {
+    private func generatePossibleMoves(node: Node<Element>) {
     }
-
-    private getPath() {
+*/
+    private func getPath() {
     }
 
     /*
