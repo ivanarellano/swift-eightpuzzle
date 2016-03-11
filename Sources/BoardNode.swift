@@ -28,22 +28,27 @@ struct BoardNode {
     }
 
     enum Direction {
-        case Up(x: Int, y: Int)
-        case Down(x: Int, y: Int)
-        case Left(x: Int, y: Int)
-        case Right(x: Int, y: Int)
+
+        case Up, Down, Left, Right
+
+        let x, y: Int
+
+        init(x: Int, y: Int) {
+            self.x = x
+            self.y = y
+        }
     }
 
     func getDirection(row: Int, column: Int) -> Direction {
-            let directions: [(Int, Int)] = [
+            let directions: [Direction] = [
                 .Up(x: 0, y: -1),
                 .Down(x: 0, y: 1),
                 .Left(x: -1, y: 0),
                 .Right(x: 1, y: 0)
             ]
 
-            for (x, y) in directions {
-                if (x == column) && (y == row) {
+            for direction in directions {
+                if (direction.x == column) && (direction.y == row) {
                     return direction
                 }
             }
