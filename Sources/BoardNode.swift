@@ -7,13 +7,25 @@ struct BoardNode {
     private let prevBoard: Node<BoardNode>?
     private let boardLayout: String
     private let direction: Direction?
-    private var f: Int?
     private let g: Int
-    private let h: Int?
-    // private let blankTilePos: (Int, Int)?
 
     private var inOpen = false
-    private var possibleMoves: [Node<BoardNode>] = []
+    private var possibleMoves = [Node<BoardNode>]()
+    private var f: Int {
+        get {
+            return g + h
+        }
+    }
+    private var h: Int {
+        get {
+            return 36 * misplaced() + 18 * manhattanOfFirstMisplacedTile() + manhattanOfFirstFromBlank()
+        }
+    }
+    private var blankTilePos: (Int, Int) {
+        get {
+            return findTile(BoardNode.blankTile)
+        }
+    }
 
     enum Direction {
         case Up, Down, Left, Right
@@ -33,9 +45,6 @@ struct BoardNode {
         self.boardLayout = boardLayout
         self.direction = direction
         self.g = prevBoard != nil ? prevBoard!.data.g + 1 : g
-        //self.f = self.g + self.h
-        self.h = 1
-        //self.blankTilePos = findTile(BoardNode.blankTile)
     }
 
     private mutating func pushPossibleMove(node: Node<BoardNode>) {
@@ -65,10 +74,6 @@ struct BoardNode {
 
     private func misplaced() -> Int {
         return 9 - placed()
-    }
-
-    private func hValue() -> Int {
-        return 36 * misplaced() + 18 * manhattanOfFirstMisplacedTile() + manhattanOfFirstFromBlank()
     }
 
     private func findTile(tile: Character) -> (dividedArrayPos: Int, modulusArrayPos: Int) {
