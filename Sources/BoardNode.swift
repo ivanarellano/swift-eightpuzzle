@@ -28,7 +28,25 @@ struct BoardNode {
     }
 
     enum Direction {
-        case Up, Down, Left, Right
+        case Up(x: Int, y: Int)
+        case Down(x: Int, y: Int)
+        case Left(x: Int, y: Int)
+        case Right(x: Int, y: Int)
+    }
+
+    func getDirection(row: Int, column: Int) -> Direction {
+            let directions: [(Int, Int)] = [
+                .Up(x: 0, y: -1),
+                .Down(x: 0, y: 1),
+                .Left(x: -1, y: 0),
+                .Right(x: 1, y: 0)
+            ]
+
+            for (x, y) in directions {
+                if (x == column) && (y == row) {
+                    return direction
+                }
+            }
     }
 
     init(boardLayout: String) {
@@ -95,4 +113,10 @@ struct BoardNode {
     private func manhattanOfFirstFromBlank() -> Int {
         return 1
     }
+}
+
+extension BoardNode.Direction: Equatable { }
+
+func ==(lhs: BoardNode.Direction, rhs: BoardNode.Direction) -> Bool {
+    return (lhs.x == rhs.x) && (lhs.y == rhs.y)
 }
