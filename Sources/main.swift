@@ -1,5 +1,6 @@
-var node1 = Node(data: 11)
-print(node1.data, node1.next)
+let bNode = BoardNode(boardLayout: "123456780")
 
-node1.next = Node(data: 123)
-print(node1.next?.data, node1.next?.next)
+print(bNode.manhattanOfFirstMisplacedTileFromBlank())
+print(bNode.manhattanOfFirstMisplacedTileFromCorrectPlace())
+print(bNode.misplaced())
+print(bNode.placed())

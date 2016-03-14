@@ -1,8 +1,16 @@
 struct BoardNode {
 
-    private static let goal = "1234567890"
+    enum Direction {
+        case Up, Down, Left, Right
+    }
+
+    private static func manhattan(x1: Int, y1: Int, x2: Int, y2: Int) -> Int {
+        return abs(x1 - x2) + abs(y1 - y2)
+    }
+    private static let goal = "123456780"
     private static let blankTile: Character = "0"
     private static let squareGridSize = 3
+    private static let totalTiles = BoardNode.squareGridSize * BoardNode.squareGridSize
 
     private let prevBoard: Node<BoardNode>?
     private let boardLayout: String
@@ -18,40 +26,13 @@ struct BoardNode {
     }
     private var h: Int {
         get {
-            return 36 * misplaced() + 18 * manhattanOfFirstMisplacedTile() + manhattanOfFirstFromBlank()
+            return 36 * misplaced() + 18 * manhattanOfFirstMisplacedTileFromCorrectPlace() + manhattanOfFirstMisplacedTileFromBlank()
         }
     }
-    private var blankTilePos: (Int, Int) {
+    private var blankTileCoord: Coordinate {
         get {
-            return findTile(BoardNode.blankTile)
+            return findCoordInBoard(boardLayout, tile: BoardNode.blankTile)
         }
-    }
-
-    enum Direction {
-
-        case Up, Down, Left, Right
-
-        let x, y: Int
-
-        init(x: Int, y: Int) {
-            self.x = x
-            self.y = y
-        }
-    }
-
-    func getDirection(row: Int, column: Int) -> Direction {
-            let directions: [Direction] = [
-                .Up(x: 0, y: -1),
-                .Down(x: 0, y: 1),
-                .Left(x: -1, y: 0),
-                .Right(x: 1, y: 0)
-            ]
-
-            for direction in directions {
-                if (direction.x == column) && (direction.y == row) {
-                    return direction
-                }
-            }
     }
 
     init(boardLayout: String) {
@@ -70,58 +51,107 @@ struct BoardNode {
         self.g = prevBoard != nil ? prevBoard!.data.g + 1 : g
     }
 
+    private func getDirection(coord: Coordinate) -> Direction? {
+        switch coord {
+        case (0, 1):
+            return .Down
+        case (0, -1):
+            return .Up
+        case (1, 0):
+            return .Right
+        case (-1, 0):
+            return .Left
+        default:
+            return nil
+        }
+
+    }
+
     private mutating func pushPossibleMove(node: Node<BoardNode>) {
         possibleMoves.append(node)
     }
 
-    private func placed() -> Int {
-        var misplaced = false
-        var placed = 0
+    func findCoordInBoard(board: String, tile: Character) -> Coordinate {
         var index = 0
-
-        if boardLayout.characters.count == BoardNode.goal.characters.count {
-            while misplaced == false && index < BoardNode.squareGridSize * BoardNode.squareGridSize {
-                for i in boardLayout.characters.indices {
-                    if boardLayout[i] != BoardNode.goal[BoardNode.goal.startIndex.advancedBy(index)] {
-                        misplaced = true
-                    } else {
-                        placed += 1
-                    }
-                    index += 1
-                }
-            }
-        }
-
-        return placed
-    }
-
-    private func misplaced() -> Int {
-        return 9 - placed()
-    }
-
-    private func findTile(tile: Character) -> (dividedArrayPos: Int, modulusArrayPos: Int) {
-        var index = 0
-        for i in boardLayout.characters.indices {
-            if boardLayout[i] == tile {
+        for i in board.characters.indices {
+            if board[i] == tile {
                 break
+            } else {
+                index += 1
             }
-            index += 1
         }
 
         return (index / BoardNode.squareGridSize, index % BoardNode.squareGridSize)
     }
 
-    private func manhattanOfFirstMisplacedTile() -> Int {
-        return 1
+    func placed() -> Int {
+        var counter = 0
+
+        if boardLayout.characters.count == BoardNode.goal.characters.count {
+            for i in boardLayout.characters.indices {
+                let goalTileAtCurrentIndex = BoardNode.goal[BoardNode.goal.startIndex.advancedBy(counter)]
+
+                if boardLayout[i] != goalTileAtCurrentIndex {
+                    break
+                } else {
+                    counter += 1
+                }
+            }
+        } else {
+            // throw error about non-matching strings
+        }
+
+        return counter
     }
 
-    private func manhattanOfFirstFromBlank() -> Int {
-        return 1
+    func misplaced() -> Int {
+        return BoardNode.totalTiles - placed()
     }
-}
 
-extension BoardNode.Direction: Equatable { }
+    func manhattanOfFirstMisplacedTileFromCorrectPlace() -> Int {
+        var counter = 0
+        var manhattanDistance = 0
 
-func ==(lhs: BoardNode.Direction, rhs: BoardNode.Direction) -> Bool {
-    return (lhs.x == rhs.x) && (lhs.y == rhs.y)
+        for i in boardLayout.characters.indices {
+
+            let goalTileAtMisplacedIndex = BoardNode.goal[BoardNode.goal.startIndex.advancedBy(counter)]
+            if boardLayout[i] != goalTileAtMisplacedIndex {
+
+                for j in boardLayout.startIndex.advancedBy(counter)...boardLayout.characters.endIndex.predecessor() {
+
+                    if boardLayout[j] == goalTileAtMisplacedIndex {
+                        let misplacedTileCoord = findCoordInBoard(boardLayout, tile: boardLayout[j])
+                        let correctTileCoord = findCoordInBoard(BoardNode.goal, tile: goalTileAtMisplacedIndex)
+
+                        manhattanDistance = BoardNode.manhattan(misplacedTileCoord.x, y1: misplacedTileCoord.y, x2: correctTileCoord.x, y2: correctTileCoord.y)
+                        break
+                    }
+                }
+
+                break
+            } else {
+                counter += 1
+            }
+        }
+
+        return manhattanDistance
+    }
+
+    func manhattanOfFirstMisplacedTileFromBlank() -> Int {
+        var counter = 0
+        var manhattanDistance = 0
+
+        for i in boardLayout.characters.indices {
+
+            let goalTileAtMisplacedIndex = BoardNode.goal[BoardNode.goal.startIndex.advancedBy(counter)]
+            if boardLayout[i] != goalTileAtMisplacedIndex {
+                let misplacedTileCoord = findCoordInBoard(BoardNode.goal, tile: goalTileAtMisplacedIndex)
+                manhattanDistance = BoardNode.manhattan(blankTileCoord.x, y1: blankTileCoord.y, x2: misplacedTileCoord.x, y2: misplacedTileCoord.y)
+            } else {
+                counter += 1
+            }
+        }
+
+        return manhattanDistance
+    }
 }
